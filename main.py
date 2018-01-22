@@ -1,40 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from time import sleep
-import re
+import sys
 
-import pyttsx3
+from PyQt5.QtWidgets import QApplication
 
-from weibo import Weibo
-
-wb = Weibo({
-    'SUB': '略',
-})
-tts = pyttsx3.init()
-
-TAG_REG = re.compile('<.*?>')
+from main_window import MainWindow
 
 
 def main():
-    while True:
-        try:
-            n_unread = wb.get_n_unread()
-            if n_unread > 0:
-                posts = wb.get_friend_feed()[n_unread - 1::-1]
-
-                for post in posts:
-                    user = post['user']['screen_name']
-                    content = post['text']
-
-                    print('{}：{}\n'.format(user, content))
-
-                    content = TAG_REG.sub('，', content)
-                    tts.say('{}说：{}'.format(user, content))
-                    tts.runAndWait()
-        except Exception as e:
-            print(e)
-
-        sleep(25)
+    app = QApplication(sys.argv)
+    main_window = MainWindow()
+    if not main_window.read_the_weibo.weibo.is_login():
+        return
+    main_window.show()
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':

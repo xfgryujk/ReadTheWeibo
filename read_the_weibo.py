@@ -4,11 +4,11 @@ import pickle
 import re
 import sys
 from logging import getLogger
-from queue import Queue, Empty
+from queue import Queue
 from threading import Thread
 
 import pyttsx3
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, QTimer
 
 from login_dlg import LoginDlg
 from popup_post import PopupPost
@@ -25,8 +25,8 @@ HHH_REG = re.compile('h{4,}', re.IGNORECASE)
 
 class ReadTheWeibo(QObject):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args):
+        super().__init__(*args)
 
         # 微博session、API
         self.weibo = None
@@ -34,6 +34,7 @@ class ReadTheWeibo(QObject):
         self.load_session()
         if not self.weibo.is_login():
             dlg = LoginDlg()
+            # 如果还是没登录则退出
             if not dlg.exec():
                 sys.exit(0)
             self.weibo.cookies = dlg.weibo_cookies
@@ -51,7 +52,8 @@ class ReadTheWeibo(QObject):
         # 微博队列
         self._post_queue = Queue()
         # 定时器、线程
-        self._timer_id = None
+        self._update_timer = QTimer(self)
+        self._update_timer.timeout.connect(self._update_posts)
         self._tts_loop_thread = None
 
     def load_session(self):
@@ -78,20 +80,17 @@ class ReadTheWeibo(QObject):
             self._tts_loop_thread = Thread(target=self._tts.startLoop)
             self._tts_loop_thread.daemon = True
             self._tts_loop_thread.start()
-        if self._timer_id is None:
-            self._timer_id = self.startTimer(5 * 1000)  # TODO 测试完后改回25s
-            self.timerEvent(None)
+        if not self._update_timer.isActive():
+            self._update_timer.start(25 * 1000)
+            self._update_posts()
 
     def stop(self):
-        if self._timer_id is not None:
-            self.killTimer(self._timer_id)
+        if self._update_timer.isActive():
+            self._update_timer.stop()
         if self._tts_loop_thread is not None:
             self._tts.endLoop()
             self._tts_loop_thread.join()
             self._tts_loop_thread = None
-
-    def timerEvent(self, event):
-        self._update_posts()
 
     def _update_posts(self):
         """
@@ -111,10 +110,13 @@ class ReadTheWeibo(QObject):
         #     logger.exception('获取新微博时出错：')
 
         # 测试
-        self._post_queue.put({
+        post = {
             'user': {'screen_name': 'test'},
             'text': '这是一条测试'
-        })
+        }
+        for i in range(5):
+            self._post_queue.put(post)
+
         self._process_new_post()
 
     def _process_new_post(self):
@@ -122,13 +124,12 @@ class ReadTheWeibo(QObject):
         处理队列中的新微博，如果正在发声或队列为空则什么也不做
         """
 
-        if self._tts.isBusy():
+        if self._tts.isBusy() or self._post_queue.empty():
             return
-        try:
-            post = self._post_queue.get_nowait()
-        except Empty:
-            return
-        logger.debug('处理微博：%s：%s', post['user']['screen_name'], post['text'])
+        post = self._post_queue.get_nowait()
+        logger.debug('处理微博：%s：%s\n剩余%d条',
+                     post['user']['screen_name'], post['text'],
+                     self._post_queue.qsize())
 
         if self.show_post:
             self._popup_post.show_post(post)
@@ -157,8 +158,17 @@ class ReadTheWeibo(QObject):
         微博弹窗被关闭
         """
 
-        logger.debug('_on_popup_post_close')
+        logger.debug('on_popup_post_close')
+        # 如果是手动关闭，停止发声，如果是发声结束关闭，什么也不做
         self._tts.stop()
+
+    def on_popup_post_hide(self):
+        """
+        微博弹窗被隐藏
+        """
+
+        logger.debug('on_popup_post_hide')
+        self._process_new_post()
 
     def _on_finish_speaking(self, name, completed):
         """
@@ -168,6 +178,6 @@ class ReadTheWeibo(QObject):
         """
 
         logger.debug('_on_finish_speaking, completed = %s', completed)
+        # 如果是手动关闭，什么也不做，如果是发声结束关闭，关闭窗口
         if completed:
-            self._popup_post.hide()
-        self._process_new_post()
+            self._popup_post.close()

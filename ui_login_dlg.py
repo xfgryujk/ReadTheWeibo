@@ -14,6 +14,7 @@ class Ui_LoginDlg(object):
         LoginDlg.setWindowModality(QtCore.Qt.ApplicationModal)
         LoginDlg.resize(382, 507)
         self.verticalLayout = QtWidgets.QVBoxLayout(LoginDlg)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.web_view = QtWebEngineWidgets.QWebEngineView(LoginDlg)
         self.web_view.setObjectName("web_view")

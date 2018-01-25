@@ -9,6 +9,9 @@ logger = getLogger(__name__)
 
 
 class Weibo:
+    """
+    微博session、API
+    """
 
     def __init__(self, cookies=None):
         self.session = Session()

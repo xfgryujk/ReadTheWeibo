@@ -12,7 +12,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.read_the_weibo = ReadTheWeibo()
+        self.read_the_weibo = ReadTheWeibo(self)
         self.read_the_weibo.start()
 
     def closeEvent(self, event):

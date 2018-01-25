@@ -5,6 +5,8 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
+# noinspection PyUnresolvedReferences
+import res_rc  # 注册资源
 from main_window import MainWindow
 
 logging.basicConfig(level=logging.DEBUG,

@@ -2,7 +2,7 @@
 
 from logging import getLogger
 
-from PyQt5.QtCore import Qt, QPropertyAnimation
+from PyQt5.QtCore import Qt, QPropertyAnimation, QTimer
 from PyQt5.QtWidgets import QMainWindow, QApplication
 
 from ui_popup_post import Ui_PopupPost
@@ -15,6 +15,10 @@ class PopupPost(QMainWindow, Ui_PopupPost):
     def __init__(self, read_the_weibo):
         super().__init__()
         self.setupUi(self)
+
+        self._close_timer = QTimer(self)
+        self._close_timer.setSingleShot(True)
+        self._close_timer.timeout.connect(self.close)
 
         self._read_the_weibo = read_the_weibo
 
@@ -42,18 +46,17 @@ class PopupPost(QMainWindow, Ui_PopupPost):
         :param post: 微博
         """
 
-        user = post['user']['screen_name']
-        content = post['text']
-
         # TODO UI换成浏览器
-        self.content_view.setText('{}：{}'.format(user, content))
+        self.content_view.setText('{}：{}'.format(post.user_name, post.raw_content))
 
         # 淡入
         self._fade_anim.setDirection(QPropertyAnimation.Forward)
         self._fade_anim.start()
         self.show()
 
-        # TODO 如果只弹窗不发声则过一段时间自动关闭
+        # 如果只弹窗不发声则过一段时间自动关闭
+        if not self._read_the_weibo.speak_post:
+            self._close_timer.start(int(len(post.content) * 0.33 * 1000))
 
     def closeEvent(self, event):
         """
@@ -62,6 +65,7 @@ class PopupPost(QMainWindow, Ui_PopupPost):
 
         logger.debug('closeEvent')
         event.ignore()
+        self._close_timer.stop()
 
         if (self._fade_anim.state() != QPropertyAnimation.Running
             or self._fade_anim.direction() != QPropertyAnimation.Backward):

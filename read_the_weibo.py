@@ -12,15 +12,16 @@ from PyQt5.QtCore import QObject, QTimer
 
 from login_dlg import LoginDlg
 from popup_post import PopupPost
-from weibo import Weibo
+from weibo import Weibo, Post
 
 logger = getLogger(__name__)
 
 SESSION_PATH = 'data/session.pickle'
 
-TAG_REG = re.compile('<.*?>')
-HAHAHA_REG = re.compile('哈{4,}')
-HHH_REG = re.compile('h{4,}', re.IGNORECASE)
+FILTER_PARAMS = (
+    (re.compile('哈{4,}'), '哈哈哈哈'),                # 哈哈党
+    (re.compile('h{4,}', re.IGNORECASE), 'hhhh'),     # 哈哈党
+)
 
 
 class ReadTheWeibo(QObject):
@@ -44,7 +45,7 @@ class ReadTheWeibo(QObject):
         # 微博弹窗
         self._popup_post = PopupPost(self)
         # 读出微博
-        self.speak_post = True
+        self.speak_post = False
         # TTS引擎
         self._tts = pyttsx3.init()
         self._tts.connect('finished-utterance', self._on_finish_speaking)
@@ -98,37 +99,38 @@ class ReadTheWeibo(QObject):
         """
 
         # TODO 测试完后改回
-        # try:
-        #     n_unread = self.weibo.get_n_unread()
-        #     if n_unread > 0:
-        #         posts = self.weibo.get_friend_feed()[n_unread - 1::-1]
-        #         for post in posts:
-        #             self._post_queue.put(post)
-        # except ConnectionResetError:
-        #     pass
-        # except:
-        #     logger.exception('获取新微博时出错：')
+        try:
+            n_unread = self.weibo.get_n_unread()
+            if n_unread > 0:
+                posts = self.weibo.get_friend_feed()[n_unread - 1::-1]
+                for post in posts:
+                    self._post_queue.put(post)
+        except ConnectionResetError:
+            pass
+        except:
+            logger.exception('获取新微博时出错：')
 
         # 测试
-        post = {
-            'user': {'screen_name': 'test'},
-            'text': '这是一条测试'
-        }
-        for i in range(5):
-            self._post_queue.put(post)
+        # post = Post()
+        # post.user_name = 'test'
+        # post.content = post.raw_content = '这是一条测试'
+        # for i in range(5):
+        #     self._post_queue.put(post)
 
         self._process_new_post()
 
     def _process_new_post(self):
         """
-        处理队列中的新微博，如果正在发声或队列为空则什么也不做
+        处理队列中的新微博，如果正在显示微博或队列为空则什么也不做
         """
 
-        if self._tts.isBusy() or self._post_queue.empty():
+        if (self._popup_post.isVisible()
+            or self._tts.isBusy()
+            or self._post_queue.empty()):
             return
         post = self._post_queue.get_nowait()
         logger.debug('处理微博：%s：%s\n剩余%d条',
-                     post['user']['screen_name'], post['text'],
+                     post.user_name, post.content,
                      self._post_queue.qsize())
 
         if self.show_post:
@@ -144,14 +146,11 @@ class ReadTheWeibo(QObject):
         :return: 处理后的微博内容
         """
 
-        user = post['user']['screen_name']
-        content = post['text']
-
-        content = TAG_REG.sub('，', content)
-        content = HAHAHA_REG.sub('哈哈哈哈', content)
-        content = HHH_REG.sub('hhhh', content)
-        content = '{}说：{}'.format(user, content)
-        return content
+        res = post.content
+        for reg, replace in FILTER_PARAMS:
+            res = reg.sub(replace, res)
+        res = '{}说：{}'.format(post.user_name, res)
+        return res
 
     def on_popup_post_close(self):
         """

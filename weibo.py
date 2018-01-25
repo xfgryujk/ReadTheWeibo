@@ -1,11 +1,33 @@
 # -*- coding: utf-8 -*-
 
+import re
 from logging import getLogger
 
 from requests import Session
 from requests.cookies import RequestsCookieJar, cookiejar_from_dict
 
 logger = getLogger(__name__)
+
+TAG_REG = re.compile('<.*?>')
+
+
+class Post:
+    """
+    一条微博
+    """
+
+    def __init__(self, post=None):
+        if post is None:
+            # HTML内容
+            self.raw_content = ''
+            # 无HTML内容
+            self.content = ''
+            self.user_name = ''
+        else:
+            self.raw_content = post['text']
+            self.content = (post['raw_text'] if 'raw_text' in post
+                            else TAG_REG.sub('', self.raw_content))
+            self.user_name = post['user']['screen_name']
 
 
 class Weibo:
@@ -58,9 +80,10 @@ class Weibo:
         """
         取首页（关注）feed
         :param max_id: 最大微博ID，用来分页
-        :return: 微博list，每页20个
+        :return: Post列表，每页20个
         """
 
-        return (self._get('https://m.weibo.cn/feed/friends',
-                          params={'max_id': max_id})
-                .json()['data']['statuses'])
+        posts = (self._get('https://m.weibo.cn/feed/friends',
+                           params={'max_id': max_id})
+                 .json()['data']['statuses'])
+        return [Post(post) for post in posts]

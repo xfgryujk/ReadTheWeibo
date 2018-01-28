@@ -117,27 +117,12 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="content_view">
+     <widget class="QWidget" name="content_widget" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
-      </property>
-      <property name="text">
-       <string>微博内容</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::AutoText</enum>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-      <property name="openExternalLinks">
-       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -155,8 +140,8 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>323</x>
-     <y>25</y>
+     <x>354</x>
+     <y>37</y>
     </hint>
     <hint type="destinationlabel">
      <x>190</x>

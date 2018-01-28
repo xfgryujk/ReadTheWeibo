@@ -45,7 +45,7 @@ class ReadTheWeibo(QObject):
         # 微博弹窗
         self._popup_post = PopupPost(self)
         # 读出微博
-        self.speak_post = False
+        self.speak_post = True
         # TTS引擎
         self._tts = pyttsx3.init()
         self._tts.connect('finished-utterance', self._on_finish_speaking)
@@ -98,9 +98,10 @@ class ReadTheWeibo(QObject):
         获取未读微博
         """
 
-        # TODO 测试完后改回
         try:
-            n_unread = self.weibo.get_n_unread()
+            # TODO 测试完后改回
+            # n_unread = self.weibo.get_n_unread()
+            n_unread = 5
             if n_unread > 0:
                 posts = self.weibo.get_friend_feed()[n_unread - 1::-1]
                 for post in posts:

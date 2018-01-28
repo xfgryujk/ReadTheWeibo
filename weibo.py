@@ -23,11 +23,23 @@ class Post:
             # 无HTML内容
             self.content = ''
             self.user_name = ''
+            # 原微博，不是转发则为None
+            self.original_post = None
         else:
             self.raw_content = post['text']
             self.content = (post['raw_text'] if 'raw_text' in post
                             else TAG_REG.sub('', self.raw_content))
             self.user_name = post['user']['screen_name']
+            self.original_post = (Post(post['retweeted_status']) if 'retweeted_status' in post
+                                  else None)
+
+    @property
+    def is_repost(self):
+        """
+        是否是转发
+        """
+
+        return self.original_post is not None
 
 
 class Weibo:

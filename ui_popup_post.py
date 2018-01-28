@@ -55,18 +55,14 @@ class Ui_PopupPost(object):
         self.close_button.setObjectName("close_button")
         self.horizontalLayout.addWidget(self.close_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.content_view = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        self.content_widget = QtWidgets.QWidget(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.content_view.sizePolicy().hasHeightForWidth())
-        self.content_view.setSizePolicy(sizePolicy)
-        self.content_view.setTextFormat(QtCore.Qt.AutoText)
-        self.content_view.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
-        self.content_view.setWordWrap(True)
-        self.content_view.setOpenExternalLinks(True)
-        self.content_view.setObjectName("content_view")
-        self.verticalLayout.addWidget(self.content_view)
+        sizePolicy.setHeightForWidth(self.content_widget.sizePolicy().hasHeightForWidth())
+        self.content_widget.setSizePolicy(sizePolicy)
+        self.content_widget.setObjectName("content_widget")
+        self.verticalLayout.addWidget(self.content_widget)
         PopupPost.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(PopupPost)
@@ -77,6 +73,5 @@ class Ui_PopupPost(object):
         _translate = QtCore.QCoreApplication.translate
         PopupPost.setWindowTitle(_translate("PopupPost", "微博"))
         self.label.setText(_translate("PopupPost", "ReadTheWeibo"))
-        self.content_view.setText(_translate("PopupPost", "微博内容"))
 
 import res_rc

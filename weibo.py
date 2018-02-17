@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+from datetime import datetime
 from logging import getLogger
 
 from requests import Session
@@ -18,18 +19,23 @@ class Post:
 
     def __init__(self, post=None):
         if post is None:
+            self.user_name = ''
+            self.avatar_url = ''
+            self.create_time = datetime.now()
             # HTML内容
             self.raw_content = ''
             # 无HTML内容
             self.content = ''
-            self.user_name = ''
             # 原微博，不是转发则为None
             self.original_post = None
         else:
+            self.user_name = post['user']['screen_name']
+            self.avatar_url = post['user']['profile_image_url']
+            self.create_time = datetime.strptime(post['created_at'],
+                                                 '%a %b %d %H:%M:%S %z %Y')
             self.raw_content = post['text']
             self.content = (post['raw_text'] if 'raw_text' in post
                             else TAG_REG.sub('', self.raw_content))
-            self.user_name = post['user']['screen_name']
             self.original_post = (Post(post['retweeted_status']) if 'retweeted_status' in post
                                   else None)
 

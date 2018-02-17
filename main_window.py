@@ -11,6 +11,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         super().__init__()
+        # TODO 完善UI
         self.setupUi(self)
         self.read_the_weibo = ReadTheWeibo(self)
         self.read_the_weibo.start()

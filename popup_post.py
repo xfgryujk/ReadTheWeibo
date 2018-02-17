@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import json
+from io import StringIO
 from logging import getLogger
 
+from PyQt5.QtCore import (Qt, QUrl, QPropertyAnimation,
+                          QParallelAnimationGroup, QTimer)
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import Qt, QPropertyAnimation, QParallelAnimationGroup, QTimer
 from PyQt5.QtWidgets import QMainWindow, QApplication
 
 from ui_popup_post import Ui_PopupPost
@@ -19,13 +22,24 @@ class WeiboWebView(QWebEngineView):
         self.setWindowFlags(Qt.ToolTip
                             | Qt.FramelessWindowHint
                             | Qt.WindowStaysOnTopHint)
+        self.load(QUrl('file:///ui/web/popup_post.html'))
 
     def contextMenuEvent(self, event):
         pass
 
     def show_post(self, post):
-        # TODO 完善UI
-        self.setHtml('{}：{}'.format(post.user_name, post.raw_content))
+        js = StringIO()
+        js.write('showPost(')
+        json.dump({
+            'userName':   post.user_name,
+            'avatarUrl':  post.avatar_url,
+            'createTime': int(post.create_time.timestamp() * 1000),
+            'rawContent': post.raw_content,
+        }, js)
+        js.write(')')
+        # TODO 解决第一次显示时是默认内容
+        self.page().runJavaScript(js.getvalue())
+
         self.show()
 
 

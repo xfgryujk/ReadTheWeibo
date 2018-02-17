@@ -16,6 +16,8 @@ logger = getLogger(__name__)
 
 class WeiboWebView(QWebEngineView):
 
+    # TODO 在外部浏览器打开链接
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setWindowTitle('')
@@ -35,6 +37,10 @@ class WeiboWebView(QWebEngineView):
             'avatarUrl':  post.avatar_url,
             'createTime': int(post.create_time.timestamp() * 1000),
             'rawContent': post.raw_content,
+            'images':     [{
+                'previewUrl': i['preview_url'],
+                'largeUrl':   i['large_url']
+            } for i in post.images],
         }, js)
         js.write(')')
         # TODO 解决第一次显示时是默认内容

@@ -26,6 +26,7 @@ class Post:
             self.raw_content = ''
             # 无HTML内容
             self.content = ''
+            self.images = []
             # 原微博，不是转发则为None
             self.original_post = None
         else:
@@ -36,6 +37,11 @@ class Post:
             self.raw_content = post['text']
             self.content = (post['raw_text'] if 'raw_text' in post
                             else TAG_REG.sub('', self.raw_content))
+            self.images = [{
+                    'preview_url': i['url'],
+                    'large_url':   i['large']['url']
+                } for i in post['pics']
+            ] if 'pics' in post else []
             self.original_post = (Post(post['retweeted_status']) if 'retweeted_status' in post
                                   else None)
 

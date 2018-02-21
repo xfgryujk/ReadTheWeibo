@@ -19,6 +19,8 @@ class Post:
 
     def __init__(self, post=None):
         if post is None:
+            self.id = ''
+            self.user_id = 0
             self.user_name = ''
             self.avatar_url = ''
             self.create_time = datetime.now()
@@ -30,6 +32,8 @@ class Post:
             # 原微博，不是转发则为None
             self.original_post = None
         else:
+            self.id = post['id']
+            self.user_id = post['user']['id']
             self.user_name = post['user']['screen_name']
             self.avatar_url = post['user']['profile_image_url']
             self.create_time = datetime.strptime(post['created_at'],

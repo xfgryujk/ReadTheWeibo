@@ -6,17 +6,28 @@ from logging import getLogger
 
 from PyQt5.QtCore import (Qt, QUrl, QPropertyAnimation,
                           QParallelAnimationGroup, QTimer)
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 from PyQt5.QtWidgets import QMainWindow, QApplication
 
 from ui_popup_post import Ui_PopupPost
 
 logger = getLogger(__name__)
 
+POPUP_POST_HTML_URL = QUrl('file:///ui/web/popup_post.html')
+
+
+class WeiboWebPage(QWebEnginePage):
+
+    def acceptNavigationRequest(self, url, navigation_type, is_main_frame):
+        if url == POPUP_POST_HTML_URL:
+            return True
+        # 在外部浏览器打开链接
+        QDesktopServices.openUrl(url)
+        return False
+
 
 class WeiboWebView(QWebEngineView):
-
-    # TODO 在外部浏览器打开链接
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,24 +35,34 @@ class WeiboWebView(QWebEngineView):
         self.setWindowFlags(Qt.ToolTip
                             | Qt.FramelessWindowHint
                             | Qt.WindowStaysOnTopHint)
-        self.load(QUrl('file:///ui/web/popup_post.html'))
+        self.setPage(WeiboWebPage(self))
+        self.load(POPUP_POST_HTML_URL)
 
     def contextMenuEvent(self, event):
+        # 去掉右键菜单
         pass
+
+    @staticmethod
+    def _get_post_dict(post):
+        return {
+            'id':           post.id,
+            'userId':       post.user_id,
+            'userName':     post.user_name,
+            'avatarUrl':    post.avatar_url,
+            'createTime':   int(post.create_time.timestamp() * 1000),
+            'rawContent':   post.raw_content,
+            'images':       [{
+                                'previewUrl': i['preview_url'],
+                                'largeUrl':   i['large_url']
+                            } for i in post.images],
+            'originalPost': (WeiboWebView._get_post_dict(post.original_post)
+                             if post.is_repost else None)
+        }
 
     def show_post(self, post):
         js = StringIO()
         js.write('showPost(')
-        json.dump({
-            'userName':   post.user_name,
-            'avatarUrl':  post.avatar_url,
-            'createTime': int(post.create_time.timestamp() * 1000),
-            'rawContent': post.raw_content,
-            'images':     [{
-                'previewUrl': i['preview_url'],
-                'largeUrl':   i['large_url']
-            } for i in post.images],
-        }, js)
+        json.dump(self._get_post_dict(post), js)
         js.write(')')
         # TODO 解决第一次显示时是默认内容
         self.page().runJavaScript(js.getvalue())

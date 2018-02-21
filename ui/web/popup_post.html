@@ -20,18 +20,20 @@
     <div id="weibo">
         <div class="wb-item-wrap">
             <div class="wb-item">
-                <div class="card m-panel card9 f-weibo">
+                <div class="card m-panel card9 f-weibo" v-if="post">
                     <!-- 作者 -->
                     <div class="card-wrap">
                         <header class="weibo-top m-box">
                             <div class="m-avatar-box m-box-center">
-                                <div class="m-img-box">
-                                    <img :src="avatarUrl">
-                                </div>
+                                <a :href="'https://m.weibo.cn/profile/' + post.userId" class="m-img-box">
+                                    <img :src="post.avatarUrl">
+                                </a>
                             </div>
                             <div class="m-box-dir m-box-col m-box-center">
                                 <div class="m-text-box">
-                                    <h3 class="m-text-cut">{{ userName }}</h3>
+                                    <a :href="'https://m.weibo.cn/profile/' + post.userId">
+                                        <h3 class="m-text-cut">{{ post.userName }}</h3>
+                                    </a>
                                     <h4 class="m-text-cut">
                                         <span class="time">{{ createTimeStr }}</span>
                                     </h4>
@@ -43,20 +45,57 @@
                         <div class="card-wrap">
                             <div class="weibo-og">
                                 <!-- 内容 -->
-                                <div class="weibo-text" v-html="rawContent">​</div>
+                                <div class="weibo-text" v-html="post.rawContent">​</div>
                                 <!-- 图片 -->
-                                <div class="weibo-media-wraps weibo-media f-media media-b" v-if="images.length">
+                                <div class="weibo-media-wraps weibo-media f-media media-b" v-if="post.images.length">
                                     <ul class="m-auto-list">
-                                        <li class="m-auto-box3" v-for="image in images">
+                                        <li class="m-auto-box3" v-for="image in post.images">
                                             <div class="m-img-box m-imghold-4-3">
-                                                <div class="f-bg-img" :style="'background-image: url(&quot;' + image.previewUrl + '&quot;);'"></div>
+                                                <a :href="image.largeUrl">
+                                                    <div class="f-bg-img" :style="'background-image: url(&quot;' + image.previewUrl + '&quot;);'"></div>
+                                                </a>
                                             </div>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
+                        <!-- 转发 -->
+                        <div class="weibo-rp" v-if="post.originalPost">
+                            <div class="card-wrap">
+                                <div class="weibo-text">
+                                    <span>
+                                        <!-- 作者 -->
+                                        <a :href="'https://m.weibo.cn/profile/' + post.originalPost.userId" class="">@{{ post.originalPost.userName }}</a>:
+                                    </span>
+                                    <!-- 内容 -->
+                                    <span v-html="post.originalPost.rawContent"></span>
+                                </div>
+                                <!-- 图片 -->
+                                <div class="weibo-media-wraps weibo-media f-media media-b" v-if="post.originalPost.images.length">
+                                    <ul class="m-auto-list">
+                                        <li class="m-auto-box3" v-for="image in post.originalPost.images">
+                                            <div class="m-img-box m-imghold-4-3">
+                                                <a :href="image.largeUrl">
+                                                    <div class="f-bg-img" :style="'background-image: url(&quot;' + image.previewUrl + '&quot;);'"></div>
+                                                </a>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <footer class="f-footer-ctrl">
+                                    <aside>
+                                        <a :href="'https://m.weibo.cn/detail/' + post.originalPost.id">查看</a>
+                                    </aside>
+                                </footer>
+                            </div>
+                        </div>
                     </article>
+                    <footer class="f-footer-ctrl">
+                        <aside>
+                            <a :href="'https://m.weibo.cn/detail/' + post.id">查看</a>
+                        </aside>
+                    </footer>
                 </div>
             </div>
         </div>
@@ -66,31 +105,36 @@
         var weibo = new Vue({
             el: '#weibo',
             data: {
-                userName: '',
-                avatarUrl: '',
-                createTime: new Date(),
-                rawContent: '',
-                images: []
+                post: null
             },
             computed: {
                 createTimeStr: function () {
-                    timeDelta = new Date() - this.createTime;
+                    timeDelta = new Date() - this.post.createTime;
                     if ((timeDelta /= 1000) < 60)
                         return Math.floor(timeDelta) + '秒前';
                     if ((timeDelta /= 60) < 60)
                         return Math.floor(timeDelta) + '分钟前';
-                    if ((timeDelta /= 24) < 30)
+                    if ((timeDelta /= 60) < 24)
+                        return Math.floor(timeDelta) + '小时前';
+                    if ((timeDelta /= 24) < 10)
                         return Math.floor(timeDelta) + '天前';
-                    return this.createTime.toLocaleString();
+                    return this.post.createTime.toLocaleString();
                 }
             },
             methods: {
                 showPost: function (post) {
-                    this.rawContent = post.rawContent;
-                    this.userName = post.userName;
-                    this.avatarUrl = post.avatarUrl;
-                    this.createTime = new Date(post.createTime);
-                    this.images = post.images;
+                    post.rawContent = this.fixRawContent(post.rawContent);
+                    post.createTime = new Date(post.createTime);
+                    if (post.originalPost)
+                        post.originalPost.rawContent = this.fixRawContent(post.originalPost.rawContent);
+                    this.post = post;
+                },
+                fixRawContent: function (rawContent) {
+                    // 表情url添加协议
+                    res = rawContent.replace( /(<img .*?src=")(\/\/.*?".*?>)/g, '$1https:$2');
+                    // 链接使用绝对路径
+                    res = res.replace( /(<a .*?href=")(\/.*?".*?>)/g, '$1https://m.weibo.cn$2');
+                    return res;
                 }
             }
         });

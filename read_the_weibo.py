@@ -12,7 +12,7 @@ from PyQt5.QtCore import QObject, QTimer
 
 from login_dlg import LoginDlg
 from popup_post import PopupPost
-from weibo import Weibo, Post
+from weibo import Weibo
 
 logger = getLogger(__name__)
 
@@ -110,13 +110,6 @@ class ReadTheWeibo(QObject):
             pass
         except:
             logger.exception('获取新微博时出错：')
-
-        # 测试
-        # post = Post()
-        # post.user_name = 'test'
-        # post.content = post.raw_content = '这是一条测试'
-        # for i in range(5):
-        #     self._post_queue.put(post)
 
         self._process_new_post()
 

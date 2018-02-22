@@ -42,10 +42,10 @@ class Post:
             self.content = (post['raw_text'] if 'raw_text' in post
                             else TAG_REG.sub('', self.raw_content))
             self.images = [{
-                    'preview_url': i['url'],
-                    'large_url':   i['large']['url']
-                } for i in post['pics']
-            ] if 'pics' in post else []
+                              'preview_url': i['url'],
+                              'large_url':   i['large']['url']
+                            } for i in post['pics']
+                           ] if 'pics' in post else []
             self.original_post = (Post(post['retweeted_status']) if 'retweeted_status' in post
                                   else None)
 

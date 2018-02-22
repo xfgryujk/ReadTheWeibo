@@ -36,7 +36,17 @@ class WeiboWebView(QWebEngineView):
                             | Qt.FramelessWindowHint
                             | Qt.WindowStaysOnTopHint)
         self.setPage(WeiboWebPage(self))
+
         self.load(POPUP_POST_HTML_URL)
+        # 等待加载结束
+        self._is_loading = True
+        self.loadFinished.connect(self._on_load_finish)
+        while self._is_loading:
+            QApplication.processEvents()
+
+    def _on_load_finish(self):
+        self._is_loading = False
+        self.loadFinished.disconnect(self._on_load_finish)
 
     def contextMenuEvent(self, event):
         # 去掉右键菜单
@@ -54,7 +64,7 @@ class WeiboWebView(QWebEngineView):
             'images':       [{
                                 'previewUrl': i['preview_url'],
                                 'largeUrl':   i['large_url']
-                            } for i in post.images],
+                              } for i in post.images],
             'originalPost': (WeiboWebView._get_post_dict(post.original_post)
                              if post.is_repost else None)
         }
@@ -64,7 +74,6 @@ class WeiboWebView(QWebEngineView):
         js.write('showPost(')
         json.dump(self._get_post_dict(post), js)
         js.write(')')
-        # TODO 解决第一次显示时是默认内容
         self.page().runJavaScript(js.getvalue())
 
         self.show()

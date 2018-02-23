@@ -21,6 +21,7 @@ SESSION_PATH = 'data/session.pickle'
 FILTER_PARAMS = (
     (re.compile('哈{4,}'), '哈哈哈哈'),                # 哈哈党
     (re.compile('h{4,}', re.IGNORECASE), 'hhhh'),     # 哈哈党
+    (re.compile('//@(.*?):'), r'。右边，\1说：'),        # 转发
 )
 
 
@@ -99,9 +100,8 @@ class ReadTheWeibo(QObject):
         """
 
         try:
-            # TODO 测试完后改回
-            # n_unread = self.weibo.get_n_unread()
-            n_unread = 5
+            n_unread = min(self.weibo.get_n_unread(), 20)
+            # n_unread = 5  # 测试用
             if n_unread > 0:
                 posts = self.weibo.get_friend_feed()[n_unread - 1::-1]
                 for post in posts:
@@ -119,8 +119,8 @@ class ReadTheWeibo(QObject):
         """
 
         if (self._popup_post.isVisible()
-            or self._tts.isBusy()
-            or self._post_queue.empty()):
+           or self._tts.isBusy()
+           or self._post_queue.empty()):
             return
         post = self._post_queue.get_nowait()
         logger.debug('处理微博：%s：%s\n剩余%d条',
@@ -143,7 +143,13 @@ class ReadTheWeibo(QObject):
         res = post.content
         for reg, replace in FILTER_PARAMS:
             res = reg.sub(replace, res)
-        res = '{}说：{}'.format(post.user_name, res)
+        if post.is_repost:
+            res = '{}转发微博，说：{}。原微博，{}'.format(
+                post.user_name, res,
+                ReadTheWeibo._filter_tts_content(post.original_post)
+                )
+        else:
+            res = '{}说：{}'.format(post.user_name, res)
         return res
 
     def on_popup_post_close(self):

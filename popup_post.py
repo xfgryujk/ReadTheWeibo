@@ -150,7 +150,10 @@ class PopupPost(QMainWindow, Ui_PopupPost):
 
         # 如果只弹窗不发声则过一段时间自动关闭
         if not self._read_the_weibo.speak_post:
-            self._close_timer.start(int(len(post.content) * 0.33 * 1000))
+            content_len = len(post.content)
+            if post.is_repost:
+                content_len += len(post.original_post.content)
+            self._close_timer.start(int((3 + content_len * 0.1) * 1000))
 
     def closeEvent(self, event):
         """
@@ -162,7 +165,7 @@ class PopupPost(QMainWindow, Ui_PopupPost):
         self._close_timer.stop()
 
         if (self._fade_anim_group.state() != QPropertyAnimation.Running
-            or self._fade_anim_group.direction() != QPropertyAnimation.Backward):
+           or self._fade_anim_group.direction() != QPropertyAnimation.Backward):
             self._read_the_weibo.on_popup_post_close()
 
             # 淡出

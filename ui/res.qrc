@@ -1,6 +1,9 @@
 <RCC>
-    <qresource prefix="/image">
-        <file>bg.png</file>
-        <file>close.png</file>
-    </qresource>
+  <qresource prefix="/image">
+    <file>bg.png</file>
+    <file>close.png</file>
+  </qresource>
+  <qresource prefix="/icon">
+    <file>sina.ico</file>
+  </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 import logging
 import sys
 
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
 # noinspection PyUnresolvedReferences
@@ -15,8 +16,11 @@ logging.basicConfig(level=logging.DEBUG,
 
 def main():
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(':/icon/sina.ico'))
+
     main_window = MainWindow()
     main_window.show()
+
     sys.exit(app.exec_())
 
 

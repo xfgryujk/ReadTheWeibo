@@ -45,3 +45,4 @@ class Ui_MainWindow(object):
         self.speak_check.setText(_translate("MainWindow", "读出微博"))
         self.show_check.setText(_translate("MainWindow", "弹窗"))
 
+import res_rc

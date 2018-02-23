@@ -3,8 +3,9 @@
 import json
 from logging import getLogger
 
-from PyQt5.QtCore import Qt, QCoreApplication
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtCore import Qt, QCoreApplication, QEvent
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow, QSystemTrayIcon
 
 from read_the_weibo import ReadTheWeibo
 from ui_mainwindow import Ui_MainWindow
@@ -21,6 +22,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                          | Qt.WindowCloseButtonHint
                          | Qt.MSWindowsFixedSizeDialogHint)
         self.setupUi(self)
+
+        self.tray = QSystemTrayIcon(self)
+        self.tray.setIcon(QIcon(':/icon/sina.ico'))
+        self.tray.setToolTip('ReadTheWeibo')
+        self.tray.activated.connect(self._on_tray_activate)
 
         self.read_the_weibo = ReadTheWeibo(self)
         self.load_settings()
@@ -62,6 +68,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 json.dump(settings, f, indent=4)
         except OSError:  # 打开文件错误
             pass
+
+    def changeEvent(self, event):
+        # 最小化到托盘
+        if (event.type() == QEvent.WindowStateChange
+           and int(self.windowState()) & Qt.WindowMinimized):
+            self.hide()
+            self.tray.show()
+
+    def _on_tray_activate(self, reason):
+        # 单击托盘时恢复窗口
+        if reason == QSystemTrayIcon.Trigger:
+            self.show()
+            self.setWindowState(Qt.WindowState((int(self.windowState())
+                                               & ~Qt.WindowMinimized)
+                                               | Qt.WindowActive))
+            self.tray.hide()
 
     def _on_speak_check_change(self, state):
         self.read_the_weibo.speak_post = state != Qt.Unchecked

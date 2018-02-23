@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>367</width>
-    <height>230</height>
+    <height>417</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,16 +32,16 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
-     <number>15</number>
+     <number>20</number>
     </property>
     <property name="topMargin">
      <number>15</number>
     </property>
     <property name="rightMargin">
-     <number>15</number>
+     <number>20</number>
     </property>
     <property name="bottomMargin">
-     <number>15</number>
+     <number>20</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">

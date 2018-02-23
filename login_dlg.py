@@ -2,7 +2,7 @@
 
 import logging
 
-from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile
 from PyQt5.QtWidgets import QDialog
 
@@ -15,17 +15,15 @@ logger = logging.getLogger(__name__)
 class LoginDlg(QDialog, Ui_LoginDlg):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(None, Qt.WindowMinimizeButtonHint
+                         | Qt.WindowCloseButtonHint)
         self.setupUi(self)
+
         # 微博的登录凭证cookie
         self._weibo_cookies = {}
 
-        self.web_view.load(QUrl('https://passport.weibo.cn/signin/login'))
-
     def setupUi(self, login_dlg):
         super().setupUi(login_dlg)
-        self.setWindowFlags(Qt.WindowMinimizeButtonHint
-                            | Qt.WindowCloseButtonHint)
         profile = self.web_view.page().profile()
         profile.setPersistentCookiesPolicy(QWebEngineProfile.NoPersistentCookies)
         profile.cookieStore().cookieAdded.connect(self._on_cookie_added)

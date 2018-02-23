@@ -17,6 +17,7 @@ class Ui_LoginDlg(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.web_view = QtWebEngineWidgets.QWebEngineView(LoginDlg)
+        self.web_view.setUrl(QtCore.QUrl("https://passport.weibo.cn/signin/login"))
         self.web_view.setObjectName("web_view")
         self.verticalLayout.addWidget(self.web_view)
 

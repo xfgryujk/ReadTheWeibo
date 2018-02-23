@@ -30,7 +30,13 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QWebEngineView" name="web_view" native="true"/>
+    <widget class="QWebEngineView" name="web_view">
+     <property name="url">
+      <url>
+       <string>https://passport.weibo.cn/signin/login</string>
+      </url>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -38,7 +44,7 @@
   <customwidget>
    <class>QWebEngineView</class>
    <extends>QWidget</extends>
-   <header>qwebengineview.h</header>
+   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
   </customwidget>
  </customwidgets>
  <resources/>

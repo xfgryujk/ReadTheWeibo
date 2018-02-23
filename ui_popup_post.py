@@ -12,7 +12,7 @@ class Ui_PopupPost(object):
     def setupUi(self, PopupPost):
         PopupPost.setObjectName("PopupPost")
         PopupPost.setEnabled(True)
-        PopupPost.resize(367, 230)
+        PopupPost.resize(367, 417)
         PopupPost.setWindowOpacity(0.0)
         PopupPost.setAutoFillBackground(False)
         PopupPost.setStyleSheet("#centralwidget {\n"
@@ -23,7 +23,7 @@ class Ui_PopupPost(object):
         self.centralwidget = QtWidgets.QWidget(PopupPost)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.verticalLayout.setContentsMargins(15, 15, 15, 15)
+        self.verticalLayout.setContentsMargins(20, 15, 20, 20)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)

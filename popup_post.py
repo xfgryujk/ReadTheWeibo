@@ -82,7 +82,9 @@ class WeiboWebView(QWebEngineView):
 class PopupPost(QMainWindow, Ui_PopupPost):
 
     def __init__(self, read_the_weibo):
-        super().__init__()
+        super().__init__(None, Qt.ToolTip
+                         | Qt.FramelessWindowHint
+                         | Qt.WindowStaysOnTopHint)
         self.setupUi(self)
 
         self._close_timer = QTimer(self)
@@ -93,14 +95,11 @@ class PopupPost(QMainWindow, Ui_PopupPost):
 
     def setupUi(self, popup_post):
         super().setupUi(popup_post)
-        self.setWindowFlags(Qt.ToolTip
-                            | Qt.FramelessWindowHint
-                            | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         desktop = QApplication.desktop()
-        self.move(desktop.width() - self.width() - 50,
-                  desktop.height() - self.height() - 300)
+        self.move(desktop.width() - 50 - self.width(),
+                  desktop.height() - 300 - self.height())
 
         # 因为带浏览器的透明窗口不能渲染，浏览器放在独立窗口
         self.content_view = WeiboWebView(self)
@@ -110,7 +109,7 @@ class PopupPost(QMainWindow, Ui_PopupPost):
         self._window_fade_anim = QPropertyAnimation(self, b'windowOpacity', self)
         self._window_fade_anim.setDuration(300)
         self._window_fade_anim.setStartValue(0)
-        self._window_fade_anim.setEndValue(0.7)
+        self._window_fade_anim.setEndValue(0.5)
         self._content_fade_anim = QPropertyAnimation(self.content_view, b'windowOpacity', self)
         self._content_fade_anim.setDuration(300)
         self._content_fade_anim.setStartValue(0)
